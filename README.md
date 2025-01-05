@@ -13,7 +13,7 @@ Download URL:  https://yann.lecun.com/exdb/mnist/
 
 # Requirement  
 Required library is listed in `requirement.txt`.  
-However, for `torch` in `NVIDIA` hardware. You need to type `nvidia-smi` in your terminal first to find your `CUDA` version.  
+However, for `torch` on `NVIDIA` hardware. You need to type `nvidia-smi` in your terminal first to find your `CUDA` version.  
 Then, browse to `pytorch.org` and find download scripts of version that lower than yours.  
 Paste the scripts to terminal to install `torch`.  
 
