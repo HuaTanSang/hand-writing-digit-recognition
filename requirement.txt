@@ -2,3 +2,5 @@ numpy
 idx2numpy
 scikit-learn
 tqdm
+os
+shulti
