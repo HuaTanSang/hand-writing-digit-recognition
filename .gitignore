@@ -173,5 +173,4 @@ cython_debug/
 
 # Specific file 
 test.ipynb
-directory.py
 
