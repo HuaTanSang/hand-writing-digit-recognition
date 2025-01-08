@@ -117,12 +117,7 @@ def main(in_dim: int, hidden_size: int, learning_rate: float):
         collate_fn=collate_fn
     )
 
-    epoch = 0
-    allowed_patience = 4
-    best_score = 0 
-    compared_score = "f1"
-    patience = 0 
-    exit_train = False
+
 
     model_list = {
         One_Layer_MLP: MLP_1_Layer_checkpoint, 
@@ -136,7 +131,13 @@ def main(in_dim: int, hidden_size: int, learning_rate: float):
         print(model_name)
 
         checkpoint_dir = model_list[model_name]
-
+        epoch = 0
+        allowed_patience = 4
+        best_score = 0 
+        compared_score = "f1"
+        patience = 0 
+        exit_train = False
+        
         if model_name == ResNet18: 
             model = model_name(in_dim, hidden_size)
         else:
