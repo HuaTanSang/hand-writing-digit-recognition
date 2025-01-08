@@ -16,7 +16,7 @@ from MLP import One_Layer_MLP, Three_Layer_MLP
 from GoogLeNet import GoogleNet
 from ResNet18 import ResNet18
 from LeNet import LeNet
-from directory import train_image_path, test_image_path, train_label_path, test_label_path, checkpoint_path, MLP_1_Layer_checkpoint, MLP_3_Layer_checkpoint, LeNet_checkpoint, GoogLeNet_checkpoint, ResNet_checkpoint
+from directory import train_image_path, test_image_path, train_label_path, test_label_path, MLP_1_Layer_checkpoint, MLP_3_Layer_checkpoint, LeNet_checkpoint, GoogLeNet_checkpoint, ResNet_checkpoint
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -132,10 +132,15 @@ def main(in_dim: int, hidden_size: int, learning_rate: float):
         ResNet18: ResNet_checkpoint
     }
 
-    for model in model_list: 
-        checkpoint_dir = model_list[model]
+    for model_name in model_list: 
+        print(model_name)
 
-        model = ResNet18(in_dim=1, hidden_size=64)
+        checkpoint_dir = model_list[model_name]
+
+        if model_name == ResNet18: 
+            model = model_name(in_dim, hidden_size)
+        else:
+            model = model_name() 
 
         model = model.to(device) 
         optim = torch.optim.Adam(model.parameters(), lr=learning_rate)
