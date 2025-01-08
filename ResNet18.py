@@ -106,10 +106,9 @@ class ResNet18(nn.Module):
 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1)) 
         self.FC = nn.Linear(hidden_size, 10)  
+        self.loss = nn.CrossEntropyLoss() 
 
-        self.loss = nn.CrossEntropyLoss()
-
-    def forward(self, x: torch.Tensor, y: torch.Tensor):
+    def forward(self, x, y):
         output = self.conv7x7(x) 
         output = self.batchnorm(output)
         output = self.maxpool(output)
@@ -118,7 +117,7 @@ class ResNet18(nn.Module):
         output = self.avgpool(output)
         output = torch.flatten(output, 1)  
 
-        y_hat =  self.FC(output)
+        y_hat = self.FC(output)
         loss = self.loss(y_hat, y)
 
-        return y_hat, loss 
+        return y_hat, loss
