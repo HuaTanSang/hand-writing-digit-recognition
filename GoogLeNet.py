@@ -88,7 +88,9 @@ class GoogleNet(nn.Module):
         self.dropout = nn.Dropout()
         self.fc = nn.Linear(1024, 10)  # Điều chỉnh output cho phù hợp
 
-    def forward(self, x):
+        self.loss = nn.CrossEntropyLoss() 
+
+    def forward(self, x: torch.Tensor, y: torch.Tensor):
         # Bước 1
         x = self.conv1(x)
         x = self.maxpool1(x)
@@ -112,6 +114,7 @@ class GoogleNet(nn.Module):
         x = self.avgpool(x)
         x = torch.flatten(x, 1)  # Flatten trước khi đưa vào fully connected
         x = self.dropout(x)
-        x = self.fc(x)
-
-        return x
+        
+        y_hat = self.fc(x)
+        loss = self.loss(y_hat, y)
+        return y_hat, loss

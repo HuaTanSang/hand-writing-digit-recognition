@@ -16,6 +16,7 @@ from MLP import One_Layer_MLP, Three_Layer_MLP
 from GoogLeNet import GoogleNet
 from ResNet18 import ResNet18
 from LeNet import LeNet
+from directory import train_image_path, test_image_path, train_label_path, test_label_path, checkpoint_path
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -26,11 +27,11 @@ def train_model(epoch: int, model: nn.Module, dataloader: DataLoader, optim: tor
 
     running_loss = .0 
     with tqdm(desc='Epoch %d - Training' % epoch, unit='it', total=len(dataloader)) as pb: 
-        for it, items in enumerate(dataloader): 
-            input_ids = items['input_ids'].to(device)
-            labels = items['labels'].to(device) 
+        for it, (image, label) in enumerate(dataloader): 
+            image = image.to(device)
+            label = label.to(device) 
 
-            _, loss = model(input_ids, labels)
+            _, loss = model(image, label)
 
             # Back propagation 
             optim.zero_grad() 
@@ -52,7 +53,10 @@ def compute_scores(predicted_label: list, true_label: list) -> list:
 
     for metric_name in metrics:
         scorer = metrics[metric_name]
-        scores[metric_name] = scorer(true_label, predicted_label, averange='micro')
+        if scorer == accuracy_score: 
+            scores[metric_name] = scorer(true_label, predicted_label)
+        else: 
+            scores[metric_name] = scorer(true_label, predicted_label, average='weighted') 
     
     return scores 
 
@@ -63,24 +67,26 @@ def evaluate_model(epoch: int, model: nn.Module, dataloader: DataLoader) -> dict
     all_predicted_labels = [] 
     scores = {} 
 
-    with tqdm(desc='Epoch %d - Evaluating' & epoch, unit='it', total=len(dataloader)) as pb: 
-        for items in dataloader: 
-            input_ids = items['input_ids'].to(device)
-            labels = items['lables'].to(device)
-
+    with tqdm(desc='Epoch %d - Evaluating' % epoch, unit='it', total=len(dataloader)) as pb: 
+        for image, label in dataloader: 
+            image = image.to(device)
+            label = label.to(device)
+                        
             with torch.no_grad(): 
-                logits, _ = model(input_ids, labels)
+                logits, _ = model(image, label)
             
-            prediction = logits.argmax(dim=-1).long() 
+        
+            prediction = logits.argmax(dim=-1).long().cpu().numpy()
 
-            labels = labels.view(-1).cpu().numpy() 
+            label = label.view(-1).cpu().numpy() 
 
             all_predicted_labels.extend(prediction) 
-            all_true_labels.extend(labels) 
-
+            all_true_labels.extend(label) 
+        
             pb.update() 
 
     scores = compute_scores(all_predicted_labels, all_true_labels)
+    return scores 
 
 def save_checkpoint(dict_to_save: dict, checkpoint_dir: str): 
     if not os.path.isdir(checkpoint_dir): 
@@ -88,44 +94,42 @@ def save_checkpoint(dict_to_save: dict, checkpoint_dir: str):
     torch.save(dict_to_save, os.path.join(f"{checkpoint_dir}", "last_model.pth"))
 
 def main(in_dim: int, hidden_size: int, learning_rate: float, checkpoint_dir: str):
-
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
-    train = MNISTDataset(
-    image_path=r'D:\UIT\Tài liệu\Năm 3\Deep Learning\mnist\train-images.idx3-ubyte',
-    label_path=r'D:\UIT\Tài liệu\Năm 3\Deep Learning\mnist\train-labels.idx1-ubyte'
+    train_dataset = MNISTDataset(
+    image_path=train_image_path,
+    label_path=train_label_path
     )
 
-    test = MNISTDataset(
-        image_path=r'D:\UIT\Tài liệu\Năm 3\Deep Learning\mnist\t10k-images.idx3-ubyte',
-        label_path=r'D:\UIT\Tài liệu\Năm 3\Deep Learning\mnist\t10k-labels.idx1-ubyte'
+    test_dataset = MNISTDataset(
+        image_path=test_image_path,
+        label_path=test_label_path
     )
 
     train_loader = DataLoader(
-        train, batch_size=64,
+        train_dataset, batch_size=64,
         shuffle=True, 
         collate_fn=collate_fn
     )
 
     test_loader = DataLoader(
-        test, batch_size=1, 
+        test_dataset, batch_size=1, 
         shuffle=True, 
         collate_fn=collate_fn
     )
 
     epoch = 0
-    allowed_patience = 5
+    allowed_patience = 4
     best_score = 0 
     compared_score = "f1"
     patience = 0 
-
-    model = LeNet() 
+    exit_train = False
+    model = ResNet18(in_dim=1, hidden_size=64)
 
     model = model.to(device) 
     optim = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
     while True: 
-        train(epoch, model, train_loader, optim)
+        train_model(epoch, model, train_loader, optim)
         # validate
         scores = evaluate_model(epoch, model, test_loader) 
         print(f"Scores: ", scores)
@@ -141,7 +145,7 @@ def main(in_dim: int, hidden_size: int, learning_rate: float, checkpoint_dir: st
             patience += 1 
         
         if patience == allowed_patience: 
-            exit_train = False 
+            exit_train = True
         
 
         save_checkpoint({
@@ -167,7 +171,7 @@ def main(in_dim: int, hidden_size: int, learning_rate: float, checkpoint_dir: st
 if __name__ == "__main__": 
     main(
         in_dim=1, hidden_size=64, learning_rate=0.001, 
-        checkpoint_dir=r'D:\UIT\Tài liệu\Năm 3\Deep Learning\hand-writing-digit-recognition\checkpoint'
+        checkpoint_dir=checkpoint_path
     )
 
 

@@ -169,3 +169,9 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+# Specific file 
+test.ipynb
+directory.py
+
