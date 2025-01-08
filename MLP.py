@@ -7,12 +7,15 @@ class One_Layer_MLP(nn.Module):
 
         self.MLP = nn.Linear(784, 10) 
         self.softmax = nn.Softmax(dim=-1)
+        self.loss = nn.CrossEntropyLoss() 
 
-    def forward(self, images: torch.Tensor):
+    def forward(self, images: torch.Tensor, label: torch.Tensor):
         images = images.reshape((images.shape[0], -1))  
         features = self.MLP(images)
         results = self.softmax(features)
-        return results
+        loss = self.loss(results, label)
+
+        return results, loss 
 
 class Three_Layer_MLP(nn.Module):
     def __init__(self) -> None:
@@ -24,8 +27,9 @@ class Three_Layer_MLP(nn.Module):
         self.ReLU = nn.ReLU()
         self.softmax = nn.Softmax(dim=-1)
         self.dropout = nn.Dropout(0.2)
+        self.loss = nn.CrossEntropyLoss() 
 
-    def forward(self, images: torch.Tensor):
+    def forward(self, images: torch.Tensor, label: torch.Tensor):
         images = images.reshape((images.shape[0], -1)) 
         features = self.MLP1(images)
         # features = self.dropout(features)
@@ -35,5 +39,6 @@ class Three_Layer_MLP(nn.Module):
         features = self.ReLU(features)
         features = self.MLP3(features)  
         results = self.softmax(features)
+        loss = self.loss(results, label)
 
-        return results
+        return results, loss 
