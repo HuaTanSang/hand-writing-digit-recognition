@@ -5,5 +5,6 @@ test_label_path = r'D:\UIT\Tài liệu\Năm 3\Deep Learning\mnist\t10k-labels.id
 checkpoint_path = r'D:\UIT\Tài liệu\Năm 3\Deep Learning\hand-writing-digit-recognition\checkpoint'
 LeNet_checkpoint = r'D:\UIT\Tài liệu\Năm 3\Deep Learning\hand-writing-digit-recognition\checkpoint\LeNet checkpoint'
 GoogLeNet_checkpoint = r'D:\UIT\Tài liệu\Năm 3\Deep Learning\hand-writing-digit-recognition\checkpoint\GoogLeNet checkpoint'
-MLP_checkpoint = r'D:\UIT\Tài liệu\Năm 3\Deep Learning\hand-writing-digit-recognition\checkpoint\MLP checkpoint'
+MLP_1_Layer_checkpoint = r'D:\UIT\Tài liệu\Năm 3\Deep Learning\hand-writing-digit-recognition\checkpoint\MLP_1_Layer checkpoint'
+MLP_3_Layer_checkpoint = r'D:\UIT\Tài liệu\Năm 3\Deep Learning\hand-writing-digit-recognition\checkpoint\MLP_3_Layer checkpoint'
 ResNet_checkpoint = r'D:\UIT\Tài liệu\Năm 3\Deep Learning\hand-writing-digit-recognition\checkpoint\ResNet18 checkpoint'

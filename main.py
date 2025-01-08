@@ -16,7 +16,7 @@ from MLP import One_Layer_MLP, Three_Layer_MLP
 from GoogLeNet import GoogleNet
 from ResNet18 import ResNet18
 from LeNet import LeNet
-from directory import train_image_path, test_image_path, train_label_path, test_label_path, checkpoint_path
+from directory import train_image_path, test_image_path, train_label_path, test_label_path, checkpoint_path, MLP_1_Layer_checkpoint, MLP_3_Layer_checkpoint, LeNet_checkpoint, GoogLeNet_checkpoint, ResNet_checkpoint
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -93,7 +93,7 @@ def save_checkpoint(dict_to_save: dict, checkpoint_dir: str):
         os.mkdir(checkpoint_dir)
     torch.save(dict_to_save, os.path.join(f"{checkpoint_dir}", "last_model.pth"))
 
-def main(in_dim: int, hidden_size: int, learning_rate: float, checkpoint_dir: str):
+def main(in_dim: int, hidden_size: int, learning_rate: float):
     
     train_dataset = MNISTDataset(
     image_path=train_image_path,
@@ -123,55 +123,66 @@ def main(in_dim: int, hidden_size: int, learning_rate: float, checkpoint_dir: st
     compared_score = "f1"
     patience = 0 
     exit_train = False
-    model = ResNet18(in_dim=1, hidden_size=64)
 
-    model = model.to(device) 
-    optim = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    model_list = {
+        One_Layer_MLP: MLP_1_Layer_checkpoint, 
+        Three_Layer_MLP: MLP_3_Layer_checkpoint, 
+        LeNet: LeNet_checkpoint, 
+        GoogleNet: GoogLeNet_checkpoint, 
+        ResNet18: ResNet_checkpoint
+    }
 
-    while True: 
-        train_model(epoch, model, train_loader, optim)
-        # validate
-        scores = evaluate_model(epoch, model, test_loader) 
-        print(f"Scores: ", scores)
-        score = scores[compared_score]
+    for model in model_list: 
+        checkpoint_dir = model_list[model]
 
-        # Prepare for next epoch
-        is_best_model = False 
-        if score > best_score: 
-            best_score = score
-            patience = 0 
-            is_best_model = True 
-        else: 
-            patience += 1 
-        
-        if patience == allowed_patience: 
-            exit_train = True
-        
+        model = ResNet18(in_dim=1, hidden_size=64)
 
-        save_checkpoint({
-            "epoch": epoch, 
-            "best_score": best_score, 
-            "patience": patience,
-            "state_dict": model.state_dict(), 
-            "optimizer": optim.state_dict() 
-        }, checkpoint_dir)
+        model = model.to(device) 
+        optim = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
+        while True: 
+            train_model(epoch, model, train_loader, optim)
+            # validate
+            scores = evaluate_model(epoch, model, test_loader) 
+            print(f"Scores: ", scores)
+            score = scores[compared_score]
+
+            # Prepare for next epoch
+            is_best_model = False 
+            if score > best_score: 
+                best_score = score
+                patience = 0 
+                is_best_model = True 
+            else: 
+                patience += 1 
+            
+            if patience == allowed_patience: 
+                exit_train = True
+            
+
+            save_checkpoint({
+                "epoch": epoch, 
+                "best_score": best_score, 
+                "patience": patience,
+                "state_dict": model.state_dict(), 
+                "optimizer": optim.state_dict() 
+            }, checkpoint_dir)
 
 
-        if is_best_model: 
-            copyfile(
-                os.path.join(checkpoint_dir, "last_model.pth"), 
-                os.path.join(checkpoint_dir, "best_model.pth")
-            )
-        
-        if exit_train: 
-            break 
+            if is_best_model: 
+                copyfile(
+                    os.path.join(checkpoint_dir, "last_model.pth"), 
+                    os.path.join(checkpoint_dir, "best_model.pth")
+                )
+            
+            if exit_train: 
+                break 
 
-        epoch += 1 
+            epoch += 1 
     
 if __name__ == "__main__": 
     main(
-        in_dim=1, hidden_size=64, learning_rate=0.001, 
-        checkpoint_dir=checkpoint_path
+        in_dim=1, hidden_size=64, learning_rate=0.001
     )
 
 
