@@ -13,7 +13,7 @@ class One_Layer_MLP(nn.Module):
         images = images.reshape((images.shape[0], -1))  
         features = self.MLP(images)
         results = self.softmax(features)
-        loss = self.loss(results, label)
+        loss = self.loss(features, label)
 
         return results, loss 
 
@@ -39,6 +39,6 @@ class Three_Layer_MLP(nn.Module):
         features = self.ReLU(features)
         features = self.MLP3(features)  
         results = self.softmax(features)
-        loss = self.loss(results, label)
+        loss = self.loss(features, label)
 
         return results, loss 

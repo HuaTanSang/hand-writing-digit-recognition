@@ -120,24 +120,25 @@ def main(in_dim: int, hidden_size: int, learning_rate: float):
 
 
     model_list = {
-        One_Layer_MLP: MLP_1_Layer_checkpoint, 
+        # One_Layer_MLP: MLP_1_Layer_checkpoint, 
         Three_Layer_MLP: MLP_3_Layer_checkpoint, 
-        LeNet: LeNet_checkpoint, 
-        GoogleNet: GoogLeNet_checkpoint, 
-        ResNet18: ResNet_checkpoint
+        # LeNet: LeNet_checkpoint, 
+        # GoogleNet: GoogLeNet_checkpoint, 
+        # ResNet18: ResNet_checkpoint
     }
 
     for model_name in model_list: 
+        print('-'*30)
         print(model_name)
 
         checkpoint_dir = model_list[model_name]
         epoch = 0
-        allowed_patience = 4
+        allowed_patience = 5
         best_score = 0 
         compared_score = "f1"
         patience = 0 
         exit_train = False
-        
+
         if model_name == ResNet18: 
             model = model_name(in_dim, hidden_size)
         else:
