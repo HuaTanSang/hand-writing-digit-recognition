@@ -76,7 +76,7 @@ def evaluate_model(epoch: int, model: nn.Module, dataloader: DataLoader) -> dict
                 logits, _ = model(image, label)
             
         
-            prediction = logits.argmax(dim=-1).long().cpu().numpy()
+            prediction = logits.argmax(dim=1).long().cpu().numpy()
 
             label = label.view(-1).cpu().numpy() 
 
@@ -120,11 +120,11 @@ def main(in_dim: int, hidden_size: int, learning_rate: float):
 
 
     model_list = {
-        # One_Layer_MLP: MLP_1_Layer_checkpoint, 
+        One_Layer_MLP: MLP_1_Layer_checkpoint, 
         Three_Layer_MLP: MLP_3_Layer_checkpoint, 
-        # LeNet: LeNet_checkpoint, 
-        # GoogleNet: GoogLeNet_checkpoint, 
-        # ResNet18: ResNet_checkpoint
+        LeNet: LeNet_checkpoint, 
+        GoogleNet: GoogLeNet_checkpoint, 
+        ResNet18: ResNet_checkpoint
     }
 
     for model_name in model_list: 
