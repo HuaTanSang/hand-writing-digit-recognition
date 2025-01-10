@@ -4,12 +4,13 @@ import torch.nn as nn
 from torchvision import transforms
 from PIL import Image, ImageOps
 import numpy as np
+import model_directory as dir 
+
 
 # Load model
-@st.cache(allow_output_mutation=True)
+# @st.cache(allow_output_mutation=True)
 def load_model(model_path):
     model = torch.load(model_path)
-    model.eval()
     return model
 
 # Preprocess input image
