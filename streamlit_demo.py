@@ -1,70 +1,39 @@
 import streamlit as st
-import torch
-import torch.nn as nn
-from torchvision import transforms
-from PIL import Image, ImageOps
+from streamlit_drawable_canvas import st_canvas
 import numpy as np
-import model_directory as dir 
+
+# Thiết lập tiêu đề ứng dụng
+st.title("Hand Writing Digit Recognition")
+
+# Cấu hình canvas
+st.header("Write a number")
+canvas_result = st_canvas(
+    fill_color="rgba(0, 0, 0, 1)",  # Màu tô (đen - không sử dụng vì chỉ cho nét vẽ)
+    stroke_width=10,                # Độ dày nét vẽ
+    stroke_color="#000000",         # Màu nét vẽ (đen)
+    background_color="#FFFFFF",     # Màu nền (trắng)
+    width=280,                      # Chiều rộng (28x10)
+    height=280,                     # Chiều cao (28x10)
+    drawing_mode="freedraw",        # Chế độ vẽ tay
+    key="canvas",                   # Khóa để định danh
+)
+
+# Xử lý kết quả sau khi vẽ
+
+if canvas_result.image_data is not None:
+    # Chuyển đổi ảnh thành kích thước 28x28
+    image_array = np.array(canvas_result.image_data)
+    
+    # Lấy giá trị grayscale và chuyển thành nhị phân (0 hoặc 255)
+    grayscale_image = np.mean(image_array[:, :, :3], axis=2)  # Chuyển thành grayscale
+    binary_image = (grayscale_image < 128).astype(np.uint8) * 255  # Chuyển thành trắng-đen
+
+    # Hiển thị hình ảnh 28x28
+    st.subheader("Hình ảnh 28x28:")
+    st.image(binary_image, width=200, clamp=True)
+
+    # Hiển thị dữ liệu numpy
+    st.subheader("Ma trận dữ liệu (28x28):")
+    st.write(binary_image)
 
 
-# Load model
-# @st.cache(allow_output_mutation=True)
-def load_model(model_path):
-    model = torch.load(model_path)
-    return model
-
-# Preprocess input image
-def preprocess_image(image):
-    # Convert to grayscale, resize to 28x28, and invert colors
-    image = ImageOps.grayscale(image)
-    image = image.resize((28, 28))
-    # Normalize pixel values
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.5,), (0.5,))
-    ])
-    tensor_image = transform(image)
-    tensor_image = tensor_image.unsqueeze(0)  # Add batch dimension
-    return tensor_image
-
-# Display top predictions
-def get_predictions(model, image):
-    with torch.no_grad():
-        outputs = model(image)
-        probabilities = torch.softmax(outputs, dim=1).squeeze()
-        top5_prob, top5_classes = torch.topk(probabilities, 5)
-    return top5_classes.numpy(), top5_prob.numpy()
-
-# Streamlit App
-st.title("MNIST Digit Recognition Demo")
-
-# Upload model
-model_path = st.file_uploader("Upload your .pth model file", type=["pth"])
-if model_path:
-    model = load_model(model_path)
-
-    # Drawing area
-    st.subheader("Draw a digit below:")
-    canvas_result = st.canvas(
-        fill_color="white",  # Background color
-        stroke_width=10,
-        stroke_color="black",
-        width=280,
-        height=280,
-        drawing_mode="freedraw",
-        key="canvas"
-    )
-
-    if canvas_result.image_data is not None:
-        drawn_image = canvas_result.image_data
-        # Convert to PIL image
-        pil_image = Image.fromarray((255 - drawn_image[:, :, 3]).astype("uint8"))  # Use alpha channel for drawing
-
-        # Preprocess and predict
-        tensor_image = preprocess_image(pil_image)
-        top5_classes, top5_probs = get_predictions(model, tensor_image)
-
-        # Display predictions
-        st.subheader("Top 5 Predictions:")
-        for i, (cls, prob) in enumerate(zip(top5_classes, top5_probs)):
-            st.write(f"{i + 1}: Digit {cls} with probability {prob:.4f}")
