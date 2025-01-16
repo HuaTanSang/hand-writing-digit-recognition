@@ -1,6 +1,6 @@
-# Hand writing digit recognition  
+# Handwritten digit recognition  
 ## Introduction  
-In this repository, I'm going to build some Deep Learning model with pytorch for hand writing digit recognition task.  
+In this repository, I'm going to build some Deep Learning model with pytorch for handwritten digit recognition task.  
 This repo contains:  
 - Multi-layer Perceptron  
 - LeNet  
